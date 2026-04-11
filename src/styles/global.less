@@ -1,0 +1,28 @@
+@import './variables.less';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: @text-color;
+  background-color: @bg-color;
+  line-height: 1.5;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 @spacing-md;
+}
+
+@media (max-width: @screen-md) {
+  .container {
+    padding: 0 @spacing-md;
+  }
+}
+
+
