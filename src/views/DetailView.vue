@@ -1,5 +1,6 @@
 <template>
   <div class="detail-page">
+    <SceneBanner></SceneBanner>
     <div class="container">
       <!-- 面包屑导航 -->
       <div class="breadcrumb">
@@ -35,6 +36,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
+import SceneBanner from '../components/SceneBanner.vue'
 
 const route = useRoute()
 const productId = route.params.id

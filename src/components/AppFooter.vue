@@ -203,7 +203,10 @@ const hideQr = () => {
 }
 
 .quick-links li a:hover {
-  color: #3b82f6;
+  color: transparent;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 /* 右侧每项样式 */
@@ -232,7 +235,10 @@ const hideQr = () => {
 }
 
 .hotline:hover {
-  color: #60a5fa;
+  color: transparent;
+  background: linear-gradient(135deg, #3b82f6, #06b6d4);
+  background-clip: text;
+  -webkit-background-clip: text;
 }
 
 .address {

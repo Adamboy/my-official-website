@@ -31,6 +31,7 @@ const menuItems = ref<MenuItem[]>([
   { path: '/service', label: '吊运服务' },
   { path: '/tech', label: '技术优势' },
   { path: '/cases', label: '成功案例' },
+  { path: '/news', label: '新闻中心' },
   { path: '/about', label: '关于我们' },
   { path: '/contact', label: '联系我们' }
 ])

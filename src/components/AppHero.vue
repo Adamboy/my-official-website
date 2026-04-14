@@ -53,15 +53,19 @@ withDefaults(defineProps<Props>(), {
 .btn-primary {
   background: @primary-color;
   color: white;
-  &:hover { background: darken(@primary-color, 10%); }
+  &:hover {
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
+    color: white;
+  }
 }
 .btn-outline {
   background: transparent;
   border: 2px solid @primary-color;
   color: @primary-color;
   &:hover {
-    background: @primary-color;
+    background: linear-gradient(135deg, #3b82f6, #06b6d4);
     color: white;
+    border-color: transparent;
   }
 }
 @media (max-width: @screen-md) {

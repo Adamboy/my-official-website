@@ -1,16 +1,30 @@
 <template>
   <div>
     <AppHero />
-    <AppFeatures />
+    <AppApplication />
+    <SceneBanner
+      title="应用场景"
+      subtitle="哪里路不通，哪里就有我们。我们为各种复杂环境提供专业的吊运解决方案。"
+      watermark="APPLICATION"
+    />
 
-<div class="loader"></div>
-    
+    <AppFeatures />
+    <AppFaq />
+    <NewsCenter />
+
+    <div class="loader"></div>
+    <ScrollToTopButton />
   </div>
 </template>
 
 <script setup lang="ts">
 import AppHero from '../components/AppHero.vue'
+import AppApplication from '../components/AppApplication.vue'
 import AppFeatures from '../components/AppFeatures.vue'
+import NewsCenter from '../components/NewsCenter.vue'
+import AppFaq from '../components/AppFaq.vue'
+import SceneBanner from '../components/SceneBanner.vue'
+import ScrollToTopButton from '../components/ScrollToTopButton.vue'
 </script>
 <style scoped>
  .loader {
