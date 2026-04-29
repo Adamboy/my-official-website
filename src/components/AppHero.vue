@@ -4,8 +4,8 @@
       <h1 class="hero__title">{{ title }}</h1>
       <p class="hero__subtitle">{{ subtitle }}</p>
       <div class="hero__actions">
-        <button class="btn btn-primary">开始体验</button>
-        <button class="btn btn-outline">了解更多</button>
+        <button class="btn btn-primary">立即咨询</button>
+        <button class="btn btn-outline">查看服务</button>
       </div>
     </div>
   </section>
@@ -17,8 +17,8 @@ interface Props {
   subtitle?: string
 }
 withDefaults(defineProps<Props>(), {
-  title: '构建您的下一代官网',
-  subtitle: '快速、现代、响应式 – 使用 Vue 3 + TypeScript + Less'
+  title: '无人机空中吊运，打通高空最后一公里',
+  subtitle: '专业无人机吊运公司，复杂场景快速响应、安全精准、低扰动施工'
 })
 </script>
 

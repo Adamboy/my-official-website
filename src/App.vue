@@ -2,7 +2,16 @@
   <div class="app">
     <AppHeader />
     <main>
-      <router-view />
+      <router-view v-slot="{ Component, route }">
+        <transition
+          name="fade-slide"
+          mode="out-in"
+          :duration="300"
+          appear
+        >
+          <component :is="Component" :key="route.path" />
+        </transition>
+      </router-view>
     </main>
     <AppFooter />
   </div>
@@ -19,7 +28,25 @@ import AppFooter from './components/AppFooter.vue'
   display: flex;
   flex-direction: column;
 }
+
 main {
   flex: 1;
+  position: relative;
+}
+
+/* Route transition animations */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-slide-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
 }
 </style>

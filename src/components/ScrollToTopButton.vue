@@ -21,6 +21,15 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue';
 
+// 防抖函数
+const debounce = <T extends (...args: any[]) => void>(fn: T, delay: number) => {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  return ((...args: Parameters<T>) => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
+  }) as T;
+};
+
 const showButton = ref(false);
 const scrollY = ref(0);
 
@@ -32,11 +41,11 @@ const scrollToTop = () => {
   });
 };
 
-// 监听滚动事件
-const handleScroll = () => {
+// 使用防抖优化滚动事件处理
+const handleScroll = debounce(() => {
   scrollY.value = window.scrollY;
   showButton.value = scrollY.value > 300;
-};
+}, 100); // 100ms 防抖
 
 // 初始化
 onMounted(() => {

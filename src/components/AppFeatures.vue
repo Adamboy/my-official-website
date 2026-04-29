@@ -1,13 +1,14 @@
 <template>
   <section class="features" id="features">
     <div class="container">
-  
+
+
       <div class="features__grid">
         <div
           v-for="(feature, idx) in features"
           :key="feature.id"
           class="feature-card"
-          :style="{ animationDelay: `${0.2 + idx * 0.2}s` }"
+          :style="{ animationDelay: `${0.2 + idx * 0.15}s` }"
         >
           <div class="feature-card__body">
             <div class="feature-card__icon" v-html="feature.icon"></div>
@@ -16,9 +17,6 @@
               <p>{{ feature.description }}</p>
             </div>
           </div>
-          <router-link :to="`/detail/${feature.id}`" class="detail-link">
-            查看详情 →
-          </router-link>
         </div>
       </div>
     </div>
@@ -38,45 +36,44 @@ interface Feature {
 const features: Feature[] = [
   {
     id: 1,
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 7h20v11a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7z"></path><path d="M4 7V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2"></path><path d="M2 7l5 5h10l5-5"></path></svg>',
-    title: '家具上楼',
-    description: '针对无电梯老旧小区或超大件家具，直接吊运至阳台或楼顶，省去人工搬运烦恼。'
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M12 7v10M4 17h16" /></svg>',
+    title: '高精度绞盘控制',
+    description: '毫米级张力校准与载荷反馈，确保吊运过程稳定无抖动。'
   },
   {
     id: 2,
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c3.866 0 7 3.134 7 7v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V9c0-3.866 3.134-7 7-7z"></path><path d="M7 14v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3"></path></svg>',
-    title: '工地建材',
-    description: '水泥、沙石、砖块等建材垂直运输，轻松跨越复杂工地地形，效率提升数倍。'
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v7"/><path d="M5.22 9.22l4.24 4.24"/><path d="M18.78 9.22l-4.24 4.24"/><circle cx="12" cy="17" r="4"/></svg>',
+    title: '远程实时监控',
+    description: '作业过程全程可视化，现场与指挥中心同步数据。'
   },
   {
     id: 3,
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>',
-    title: '电力光伏',
-    description: '屋顶光伏板吊装、电力塔材运输。精准定位投放，减少因人工搬运造成的组件破损。'
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l4 4-4 4-4-4 4-4z"/><path d="M12 22v-8"/><path d="M6 14h12"/></svg>',
+    title: '全天候作业',
+    description: '防风雨设计与工业级抗震保护，支持多场景连续作业。'
   },
   {
     id: 4,
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20h20"></path><path d="M4 20l6-8 4 4 6-8 4 8"></path></svg>',
-    title: '山地运输',
-    description: '景区物资补给、基站建设材料上山。无视崎岖山路，直线抵达目的地。'
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M12 4v16"/><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>',
+    title: '低扰动施工',
+    description: '高空吊运不占地、少噪音，适合城市与敏感场地。'
   },
   {
     id: 5,
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-    title: '应急救援',
-    description: '道路阻断时的物资投送、医疗急救包配送。争分夺秒，打通生命通道。'
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18"/><path d="M12 3v18"/><circle cx="12" cy="12" r="3"/></svg>',
+    title: '智能路径规划',
+    description: '自动避障与高效航线规划，减少空中运行时间。'
   },
   {
     id: 6,
-    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-1.36-1.36-2-3.14-2-5 0-2.21 1.79-4 4-4 1.47 0 2.76.81 3.55 2h-3.55c-1.1 0-2 .9-2 2 0 1.26.56 2.42 1.45 3.21.88.79 2.07 1.21 3.55 1.21 1.77 0 3.3-.77 4.4-2"></path><path d="M18 12c0-3.31-2.69-6-6-6s-6 2.69-6 6c0 1.66.68 3.16 1.78 4.22C8.16 17.32 6.66 18 5 18c-3.31 0-6-2.69-6-6s2.69-6 6-6"></path></svg>',
-    title: '生鲜水果',
-    description: '易损生鲜、水果的最后一里极速直达，比快更快。'
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#36BFFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/><path d="M8 8l8 8"/><path d="M16 8l-8 8"/></svg>',
+    title: '专业风险管控',
+    description: '多重安全保护与故障预警，保障吊运现场零事故。'
   }
 ]
 
-// 生命周期示例：组件挂载后打印日志
 onMounted(() => {
-  console.log('Features 组件已挂载，卡片浮动动效已启用')
+
 })
 </script>
 
@@ -85,7 +82,7 @@ onMounted(() => {
 
 .features {
   padding: @spacing-xl 0;
-  background: rgb(248 250 252);
+  background: white;
 }
 
 
@@ -101,20 +98,19 @@ onMounted(() => {
   flex-direction: column;
   justify-content: space-between;
   text-align: left;
-  padding: @spacing-lg;
+  padding: 2rem;
   border-radius: 1rem;
-  background: white;
+  background: #ffffff;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.06);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   opacity: 0;
   transform: translateY(30px);
-  /* 入场动画 + 持续浮动动画 */
   animation: slideUpFade 0.5s forwards, float 3s ease-in-out infinite;
   will-change: transform;
 
   &:hover {
     transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
-    /* hover 时暂停浮动动画，避免冲突 */
+    box-shadow: 0 30px 70px rgba(15, 23, 42, 0.1);
     animation-play-state: paused;
   }
 

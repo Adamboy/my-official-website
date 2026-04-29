@@ -1,18 +1,23 @@
-<template>
-  <div>
+﻿<template>
+  <div class="home-page">
     <AppHero />
-    <AppApplication />
-    <SceneBanner
-      title="应用场景"
-      subtitle="哪里路不通，哪里就有我们。我们为各种复杂环境提供专业的吊运解决方案。"
-      watermark="APPLICATION"
-    />
 
-    <AppFeatures />
+    <AppApplication />
+
+    <section id="tech" class="home-tech">
+      <SceneBanner
+        title="技术优势"
+        subtitle="智能无人机吊运技术，让复杂场景也能实现快速、安全、可控的空中搬运。"
+        watermark="ADVANTAGE"
+      />
+
+      <AppFeatures />
+    </section>
+    <HomeCases />
+    <HomeProcess />
     <AppFaq />
     <NewsCenter />
-
-    <div class="loader"></div>
+    <HomeContactCta />
     <ScrollToTopButton />
   </div>
 </template>
@@ -25,72 +30,62 @@ import NewsCenter from '../components/NewsCenter.vue'
 import AppFaq from '../components/AppFaq.vue'
 import SceneBanner from '../components/SceneBanner.vue'
 import ScrollToTopButton from '../components/ScrollToTopButton.vue'
+import HomeCases from '../components/HomeCases.vue'
+import HomeProcess from '../components/HomeProcess.vue'
+import HomeContactCta from '../components/HomeContactCta.vue'
 </script>
-<style scoped>
- .loader {
-    position: relative;
-    width: 120px;
-    height: 90px;
-    margin: 0 auto;
-    right: 0;
-    margin: 0;
+
+<style lang="less" scoped>
+@import '../styles/variables.less';
+
+.home-stats {
+  padding: 2rem 0 3rem;
+  background: #f8fbff;
+}
+
+.stats-grid {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  background: #ffffff;
+  border: 1px solid rgba(59, 130, 246, 0.14);
+  border-radius: 1.2rem;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.05);
+}
+
+.stat-item strong {
+  display: block;
+  font-size: 2rem;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+}
+
+.stat-item span {
+  color: #475569;
+}
+
+@media (max-width: 980px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
   }
+}
 
-  .loader:before {
-    content: "";
-    position: absolute;
-    bottom: 30px;
-    left: 50px;
-    height: 30px;
-    width: 30px;
-    border-radius: 50%;
-    background: #2a9d8f;
-    animation: loading-bounce 0.5s ease-in-out infinite alternate;
+.home-tech {
+  scroll-margin-top: 100px;
+}
+
+@media (max-width: 700px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
-
-  .loader:after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 0;
-    height: 7px;
-    width: 45px;
-    border-radius: 4px;
-    box-shadow: 0 5px 0 #f2f2f2, -35px 50px 0 #f2f2f2, -70px 95px 0 #f2f2f2;
-    animation: loading-step 1s ease-in-out infinite;
-  }
-
-  @keyframes loading-bounce {
-    0% {
-      transform: scale(1, 0.7);
-    }
-
-    40% {
-      transform: scale(0.8, 1.2);
-    }
-
-    60% {
-      transform: scale(1, 1);
-    }
-
-    100% {
-      bottom: 140px;
-    }
-  }
-
-  @keyframes loading-step {
-    0% {
-      box-shadow: 0 10px 0 rgba(0, 0, 0, 0),
-              0 10px 0 #f2f2f2,
-              -35px 50px 0 #f2f2f2,
-              -70px 90px 0 #f2f2f2;
-    }
-
-    100% {
-      box-shadow: 0 10px 0 #f2f2f2,
-              -35px 50px 0 #f2f2f2,
-              -70px 90px 0 #f2f2f2,
-              -70px 90px 0 rgba(0, 0, 0, 0);
-    }
-  }
+}
 </style>
+
+

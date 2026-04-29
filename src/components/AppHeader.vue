@@ -1,35 +1,46 @@
 <template>
-  <nav class="navbar">
+  <nav class="navbar" :class="{ shrink: headerShrunk }">
     <div class="nav-container">
       <button class="hamburger" :class="{ active: menuOpen }" @click="toggleMenu">
         <span></span><span></span><span></span>
       </button>
       <ul class="nav-menu" :class="{ active: menuOpen }">
-        <li v-for="item in menuItems" :key="item.path">
-          <router-link :to="item.path" class="nav-link" :class="{ active: $route.path === item.path }" @click="closeMenuOnMobile">
-            {{ item.label }}
-          </router-link>
-        </li>
-      </ul>
+              <li v-for="item in menuItems" :key="item.path">
+                <router-link 
+                  :to="item.path" 
+                  class="nav-link" 
+                  :class="{ active: isNavLinkActive(item.path) }" 
+                  @click="closeMenuOnMobile"
+                >
+                  {{ item.label }}
+                </router-link>
+              </li>
+            </ul>
     </div>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'   // 新增
-
-const route = useRoute() 
+import { useRoute } from 'vue-router'
 
 interface MenuItem {
   path: string
   label: string
 }
 
+const route = useRoute()
+
+const headerShrunk = ref(false)
+
+const handleScroll = (): void => {
+  headerShrunk.value = window.scrollY > 60
+}
+
 const menuItems = ref<MenuItem[]>([
   { path: '/', label: '首页' },
   { path: '/service', label: '吊运服务' },
-  { path: '/tech', label: '技术优势' },
+  // { path: '/#tech', label: '技术优势' }, // 锚点跳转到首页的 tech 模块
   { path: '/cases', label: '成功案例' },
   { path: '/news', label: '新闻中心' },
   { path: '/about', label: '关于我们' },
@@ -58,6 +69,16 @@ const closeMenuOnMobile = (): void => {
   }
 }
 
+// 判断导航链接是否激活（支持锚点路径）
+const isNavLinkActive = (path: string): boolean => {
+  // 如果是锚点路径（如 /#tech），检查 hash
+  if (path.startsWith('/#')) {
+    return route.hash === path.substring(1)
+  }
+  // 普通路径直接比较
+  return route.path === path
+}
+
 const handleResize = (): void => {
   if (window.innerWidth > 768 && menuOpen.value) {
     closeMenu()
@@ -66,10 +87,13 @@ const handleResize = (): void => {
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  window.addEventListener('scroll', handleScroll, { passive: true })
+  handleScroll()
 })
 
 onUnmounted(() => {
   window.removeEventListener('resize', handleResize)
+  window.removeEventListener('scroll', handleScroll)
   document.body.classList.remove('menu-open')
 })
 </script>
@@ -85,26 +109,44 @@ onUnmounted(() => {
   position: sticky;
   top: 0;
   z-index: 1000;
+  height: 56px;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(64, 164, 255, 0.2);
   box-shadow: 0 2px 12px rgba(0, 120, 255, 0.08);
+  transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.navbar.shrink {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+  border-bottom-color: rgba(64, 164, 255, 0.16);
 }
 
 .nav-container {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 0.9rem 1.5rem;
+  height: 100%;
+  padding: 0 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: padding 0.3s ease;
+}
+
+.navbar.shrink .nav-container {
+  padding: 0 1.5rem;
+}
+
+.navbar.shrink .nav-link {
+  font-size: 0.88rem;
 }
 
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 2.2rem;
+  gap: 2rem;
   list-style: none;
   transition: all 0.3s ease;
 }
@@ -116,7 +158,7 @@ onUnmounted(() => {
   font-size: 1rem;
   padding: 0.5rem 0;
   position: relative;
-  transition: color 0.2s;
+  transition: color 0.2s, font-size 0.3s ease;
   letter-spacing: 0.5px;
 }
 

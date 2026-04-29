@@ -1,377 +1,467 @@
 <template>
-  <section ref="rootRef" class="news-center" id="news-center">
+  <section class="news-center" id="news-center">
     <div class="news-center__inner">
       <div class="news-center__header">
         <div class="news-center__titles">
           <p class="news-center__eyebrow">新闻中心</p>
-          <h2 class="news-center__title">与您分享，易载航空实时动态</h2>
         </div>
-        <router-link to="/news" class="news-center__more">
-          查看更多 <span aria-hidden="true">→</span>
-        </router-link>
       </div>
 
-      <div class="news-center__grid">
-        <article
-          v-for="(item, idx) in newsList"
-          :key="item.date"
-          class="news-card"
-          :class="{ 'is-visible': visibleCards[idx] }"
-          :style="{ transitionDelay: `${idx * 0.1}s` }"
-          :data-index="idx"
+      <div class="news-list-wrapper">
+        <div 
+          class="news-list" 
+          @mouseenter="pauseScroll" 
+          @mouseleave="resumeScroll"
+          @touchstart="pauseScroll"
+          @touchend="resumeScroll"
         >
-          <div class="news-card__cover">
-            <img
-              :src="getCoverSrc(item.cover)"
-              :alt="item.cover"
-              loading="lazy"
-              decoding="async"
-            />
+          <div 
+            ref="newsTrackRef" 
+            class="news-track" 
+            :class="{ 'smooth-transition': enableTransition }"
+          >
+            <article 
+              v-for="(item, idx) in duplicatedNews" 
+              :key="`${item.id}-${idx}`" 
+              class="news-item"
+            >
+              <img 
+                :src="item.cover" 
+                class="news-img" 
+                :alt="item.title" 
+                loading="lazy" 
+                @load="handleImageLoad"
+              />
+              <div class="news-info">
+                <div class="news-date">{{ item.date }}</div>
+                <h3 class="news-title">{{ item.title }}</h3>
+                <div class="news-desc">{{ item.desc }}</div>
+                <a href="#" class="news-more" @click.prevent="handleDetail(item)">查看详情 →</a>
+              </div>
+            </article>
           </div>
-          <div class="news-card__content">
-            <div class="news-card__meta">
-              <span class="news-card__meta-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 7V12L15 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12Z" stroke="currentColor" stroke-width="1.8"/>
-                </svg>
-              </span>
-              <span class="news-card__meta-date">{{ item.date }}</span>
-            </div>
-            <h3 class="news-card__headline">{{ item.title }}</h3>
-          </div>
-        </article>
+        </div>
+        
+        <button class="slide-btn slide-btn--prev" @click="slidePrev" aria-label="上一组">←</button>
+        <button class="slide-btn slide-btn--next" @click="slideNext" aria-label="下一组">→</button>
       </div>
     </div>
   </section>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
 
 interface NewsItem {
+  id: number
   date: string
   title: string
+  desc: string
   cover: string
+  category: string
 }
 
 const newsList = ref<NewsItem[]>([
   {
-    date: '2026-01-29',
-    title: '向-30℃出发！易载航空EayLoad绞盘极寒可靠性验证纪实',
-    cover: '极寒测试实景图'
+    id: 1,
+    date: '2026-04-15',
+    title: '大型光伏基地无人机吊运项目顺利完成验收',
+    desc: '本次吊运任务覆盖山区光伏板运输，有效提升施工效率，降低人工风险，获得甲方高度认可。',
+    cover: 'https://picsum.photos/600/400?random=1',
+    category: '项目案例'
   },
   {
-    date: '2025-02-07',
-    title: '喜报 | 天津易载航空“应用于无人机的货物运输索降绞盘及其控制方法”获发明专利!',
-    cover: '红色喜报背景图'
+    id: 2,
+    date: '2026-04-10',
+    title: '新一代重型吊运无人机正式投入使用',
+    desc: '载重能力提升30%，续航更长，稳定性更强，适用于建材、光伏、工程应急等多种场景。',
+    cover: 'https://picsum.photos/600/400?random=2',
+    category: '公司动态'
   },
   {
-    date: '2024-11-06',
-    title: '来了!无人机空吊解决方案专业开发商!',
-    cover: '蓝色科技风品牌图'
+    id: 3,
+    date: '2026-04-05',
+    title: '甲乙双方安全作业规范培训会顺利召开',
+    desc: '会议明确现场作业流程、起降安全区域、时间确认机制及图片留证标准，强化安全管理。',
+    cover: 'https://picsum.photos/600/400?random=3',
+    category: '安全公告'
+  },
+  {
+    id: 4,
+    date: '2026-04-01',
+    title: '无人机吊运技术获行业创新应用奖项',
+    desc: '凭借高效、安全、环保的作业模式，在工程建设领域获得权威机构认可与表彰。',
+    cover: 'https://picsum.photos/600/400?random=4',
+    category: '行业资讯'
+  },
+  {
+    id: 5,
+    date: '2026-03-25',
+    title: '山区建材吊运项目圆满完成，效率提升显著',
+    desc: '针对复杂地形实施精准吊运，大幅减少人工搬运成本，缩短工期，获得合作方好评。',
+    cover: 'https://picsum.photos/600/400?random=5',
+    category: '项目案例'
+  },
+  {
+    id: 6,
+    date: '2026-03-20',
+    title: '行业新规发布：无人机吊运安全标准进一步升级',
+    desc: '公司积极响应政策，全面升级设备检测、人员培训与作业流程，确保合规安全运行。',
+    cover: 'https://picsum.photos/600/400?random=6',
+    category: '安全公告'
   }
 ])
 
-const visibleCards = ref<boolean[]>(newsList.value.map(() => false))
-const rootRef = ref<HTMLElement | null>(null)
-let observer: IntersectionObserver | null = null
+const newsTrackRef = ref<HTMLElement | null>(null)
+const isPaused = ref(false)
+const userPaused = ref(false)
+let animationFrame: number | null = null
+let currentTranslateX = 0
+let trackWidth = 0
+let resizeObserver: ResizeObserver | null = null
+let autoResumeTimer: ReturnType<typeof setTimeout> | null = null
 
-const revealCards = (): void => {
-  const cards = rootRef.value?.querySelectorAll<HTMLElement>('.news-card') ?? []
-  if (!observer) {
-    visibleCards.value = visibleCards.value.map(() => true)
-    return
-  }
+// 过渡动画相关
+const enableTransition = ref(false)
+let transitionTimer: ReturnType<typeof setTimeout> | null = null
+let activeTransitionEndHandler: (() => void) | null = null
 
-  cards.forEach((card) => {
-    observer?.observe(card)
-  })
+const duplicatedNews = computed(() => [...newsList.value, ...newsList.value])
+
+/** 获取单个卡片宽度 + gap (步长) */
+const getStepDistance = (): number => {
+  if (!newsTrackRef.value) return 350
+  const firstItem = newsTrackRef.value.querySelector('.news-item') as HTMLElement
+  if (!firstItem) return 350
+  const itemWidth = firstItem.offsetWidth
+  const gap = 20
+  return itemWidth + gap
 }
 
-const getCoverSrc = (label: string): string => {
-  const svg = `
-    <svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'>
-      <defs>
-        <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-          <stop offset='0' stop-color='%2336BFFA' />
-          <stop offset='1' stop-color='%230F172A' />
-        </linearGradient>
-      </defs>
-      <rect width='640' height='360' fill='url(%23g)' />
-      <rect x='0' y='0' width='640' height='360' fill='rgba(255,255,255,0.16)' />
-      <text x='50%' y='50%' fill='%23ffffff' font-size='30' font-family='Helvetica, Arial, sans-serif' text-anchor='middle' dominant-baseline='middle'>${label}</text>
-    </svg>`
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+/** 重新计算一组新闻的总宽度（trackWidth） */
+const recalculateScrollWidth = () => {
+  const el = newsTrackRef.value
+  if (!el || el.children.length === 0) return
+  const fullWidth = el.scrollWidth
+  if (fullWidth > 0) {
+    const newTrackWidth = fullWidth / 2
+    if (Math.abs(newTrackWidth - trackWidth) > 1) {
+      trackWidth = newTrackWidth
+      // 确保当前偏移在有效范围内
+      if (currentTranslateX >= trackWidth) {
+        currentTranslateX -= trackWidth
+        updatePositionWithoutTransition(currentTranslateX)
+      } else if (currentTranslateX < 0) {
+        currentTranslateX += trackWidth
+        updatePositionWithoutTransition(currentTranslateX)
+      }
+    }
+  }
+}
+
+/** 瞬间更新位置（不带动画） */
+const updatePositionWithoutTransition = (x: number) => {
+  if (!newsTrackRef.value) return
+  const wasTransition = enableTransition.value
+  if (wasTransition) {
+    enableTransition.value = false
+  }
+  currentTranslateX = x
+  newsTrackRef.value.style.transform = `translateX(-${currentTranslateX}px)`
+  if (wasTransition) {
+    // 强制浏览器重绘，确保下次动画时过渡属性生效
+    void newsTrackRef.value.offsetHeight
+    enableTransition.value = true
+  }
+}
+
+/** 清除所有过渡相关状态，取消正在进行的动画 */
+const cancelTransition = () => {
+  if (activeTransitionEndHandler && newsTrackRef.value) {
+    newsTrackRef.value.removeEventListener('transitionend', activeTransitionEndHandler)
+    activeTransitionEndHandler = null
+  }
+  if (transitionTimer) {
+    clearTimeout(transitionTimer)
+    transitionTimer = null
+  }
+  enableTransition.value = false
+}
+
+/** 手动滑动核心（带平滑动画，支持无限循环） */
+const slide = (direction: 1 | -1) => {
+  if (!newsTrackRef.value) return
+
+  // 取消任何正在进行的过渡动画
+  cancelTransition()
+
+  // 暂停自动滚动
+  userPaused.value = true
+  if (autoResumeTimer) clearTimeout(autoResumeTimer)
+  autoResumeTimer = setTimeout(() => {
+    userPaused.value = false
+    autoResumeTimer = null
+  }, 3000)
+
+  // 确保 trackWidth 是最新的
+  recalculateScrollWidth()
+  const step = getStepDistance()
+  let newX = currentTranslateX + direction * step
+
+  // 无限循环核心：如果越界，先瞬间平移一整组宽度（无动画），再计算最终目标位置
+  if (newX < 0) {
+    // 向右移动越界：将位置向右平移一组宽度
+    updatePositionWithoutTransition(currentTranslateX + trackWidth)
+    newX = currentTranslateX + direction * step
+  } else if (newX >= trackWidth) {
+    // 向左移动越界：将位置向左平移一组宽度
+    updatePositionWithoutTransition(currentTranslateX - trackWidth)
+    newX = currentTranslateX + direction * step
+  }
+
+  // 启用过渡动画，移动到目标位置
+  enableTransition.value = true
+  currentTranslateX = newX
+  newsTrackRef.value.style.transform = `translateX(-${currentTranslateX}px)`
+
+  // 动画结束后的清理工作
+  const onTransitionEnd = () => {
+    cancelTransition()
+    // 再次确保偏移量在有效范围内（避免累计误差）
+    if (currentTranslateX >= trackWidth || currentTranslateX < 0) {
+      const corrected = ((currentTranslateX % trackWidth) + trackWidth) % trackWidth
+      updatePositionWithoutTransition(corrected)
+    }
+  }
+  activeTransitionEndHandler = onTransitionEnd
+  newsTrackRef.value.addEventListener('transitionend', onTransitionEnd, { once: true })
+  // 保险：如果过渡事件未触发，0.4秒后强制结束
+  transitionTimer = setTimeout(() => {
+    if (enableTransition.value) {
+      onTransitionEnd()
+    }
+  }, 400)
+}
+
+const slidePrev = () => slide(-1)
+const slideNext = () => slide(1)
+
+const pauseScroll = () => { isPaused.value = true }
+const resumeScroll = () => { isPaused.value = false }
+
+const handleImageLoad = () => {
+  recalculateScrollWidth()
+}
+
+const handleDetail = (_item: NewsItem) => {
+  // 可替换为实际路由跳转
+}
+
+/** 自动滚动（逐帧平滑，无过渡） */
+const startAutoScroll = async () => {
+  await nextTick()
+  const el = newsTrackRef.value
+  if (!el) return
+
+  recalculateScrollWidth()
+  if (trackWidth <= 0) return
+
+  const speed = 0.8
+  const step = () => {
+    if (!isPaused.value && !userPaused.value && trackWidth > 0) {
+      currentTranslateX += speed
+      if (currentTranslateX >= trackWidth) {
+        currentTranslateX -= trackWidth
+      }
+      // 自动滚动时禁用过渡
+      if (enableTransition.value) enableTransition.value = false
+      el.style.transform = `translateX(-${currentTranslateX}px)`
+    }
+    animationFrame = requestAnimationFrame(step)
+  }
+
+  if (animationFrame) cancelAnimationFrame(animationFrame)
+  animationFrame = requestAnimationFrame(step)
+}
+
+const handleResize = () => {
+  recalculateScrollWidth()
+  // 窗口大小变化后，确保位置不超出
+  if (currentTranslateX >= trackWidth || currentTranslateX < 0) {
+    const corrected = ((currentTranslateX % trackWidth) + trackWidth) % trackWidth
+    updatePositionWithoutTransition(corrected)
+  }
 }
 
 onMounted(() => {
-  nextTick(() => {
-    if ('IntersectionObserver' in window) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.isIntersecting) {
-              return
-            }
-            const index = Number(entry.target.getAttribute('data-index'))
-            if (!Number.isNaN(index)) {
-              visibleCards.value[index] = true
-            }
-            observer?.unobserve(entry.target)
-          })
-        },
-        {
-          threshold: 0.2
-        }
-      )
-      revealCards()
-    } else {
-      visibleCards.value = visibleCards.value.map(() => true)
-    }
-  })
+  startAutoScroll()
+  window.addEventListener('resize', handleResize)
+  if (newsTrackRef.value && window.ResizeObserver) {
+    resizeObserver = new ResizeObserver(() => recalculateScrollWidth())
+    resizeObserver.observe(newsTrackRef.value)
+  }
 })
 
 onUnmounted(() => {
-  observer?.disconnect()
+  if (animationFrame) cancelAnimationFrame(animationFrame)
+  if (autoResumeTimer) clearTimeout(autoResumeTimer)
+  if (transitionTimer) clearTimeout(transitionTimer)
+  cancelTransition()
+  window.removeEventListener('resize', handleResize)
+  if (resizeObserver) resizeObserver.disconnect()
 })
 </script>
 
 <style lang="less" scoped>
-@import '../styles/variables.less';
-
 .news-center {
-  position: relative;
-  overflow: hidden;
-  background: #ffffff;
-  padding: 4rem 1rem 3rem;
+  background: white;
 }
-
-.news-center::before {
-  content: '';
-  position: absolute;
-  top: 1rem;
-  left: 2%;
-  width: 220px;
-  height: 220px;
-  opacity: 0.3;
-  background-image: radial-gradient(circle at 0 0, rgba(148, 163, 184, 0.25) 1px, transparent 1px);
-  background-size: 16px 16px;
-  pointer-events: none;
-}
-
-.news-center::after {
-  content: '';
-  position: absolute;
-  right: -20px;
-  bottom: -20px;
-  width: 380px;
-  height: 260px;
-  opacity: 0.22;
-  background-image: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
-    linear-gradient(rgba(148, 163, 184, 0.18) 1px, transparent 1px);
-  background-size: 22px 22px;
-  transform: rotate(18deg);
-  pointer-events: none;
-}
-
 .news-center__inner {
-  position: relative;
-  max-width: 1280px;
   margin: 0 auto;
+  padding: 2rem 0;
 }
-
 .news-center__header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: @spacing-lg;
-  margin-bottom: 2.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
 }
-
-.news-center__titles {
-  max-width: 720px;
-}
-
 .news-center__eyebrow {
-  margin: 0 0 0.75rem;
   font-size: 1.95rem;
   font-weight: 700;
   color: #0f172a;
-  letter-spacing: 0.06em;
-}
-
-.news-center__title {
   margin: 0;
-  font-size: 1.5rem;
-  line-height: 1.05;
-  font-weight: 800;
-  color: #0f172a;
 }
 
-.news-center__more {
-  align-self: flex-start;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+.news-list-wrapper {
   position: relative;
-  text-decoration: none;
-  color: #0f172a;
-  font-weight: 500;
-  font-size: 0.98rem;
-  transition: color 0.3s ease;
 }
-
-.news-center__more::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -3px;
-  width: 0;
-  height: 2px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #3b82f6, #06b6d4);
-  transition: width 0.3s ease;
-}
-
-.news-center__more span {
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.news-center__more:hover {
-  color: transparent;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  background-clip: text;
-  -webkit-background-clip: text;
-}
-
-.news-center__more:hover::after {
+.news-list {
+  overflow: hidden;
   width: 100%;
 }
-
-.news-center__more:hover span {
-  transform: translateX(4px);
-}
-
-.news-center__grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
-}
-
-.news-card {
+.news-track {
   display: flex;
-  flex-direction: column;
-  background: rgba(255, 255, 255, 0.9);
+  gap: 20px;
+  width: max-content;
+  transform: translateX(0);
+  will-change: transform;
+  padding: 12px 0;
+}
+.news-track.smooth-transition {
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+}
+
+.news-item {
+  flex: 0 0 330px;
+  width: 330px;
+  background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
-  transform: translateY(16px);
-  opacity: 0;
-  transition: transform 0.35s ease, box-shadow 0.35s ease, opacity 0.35s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
 }
-
-.news-card.is-visible {
-  transform: translateY(0);
-  opacity: 1;
-}
-
-.news-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 22px 38px rgba(15, 23, 42, 0.15);
-}
-
-.news-card:hover .news-card__cover img {
-  transform: scale(1.05);
-}
-
-.news-card:hover .news-card__headline {
-  color: transparent;
-  background: linear-gradient(135deg, #3b82f6, #06b6d4);
-  background-clip: text;
-  -webkit-background-clip: text;
-}
-
-.news-card__cover {
-  position: relative;
+.news-img {
   width: 100%;
-  padding-top: 56.25%;
-  overflow: hidden;
-  background: #eef2ff;
-}
-
-.news-card__cover img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  height: 200px;
   object-fit: cover;
-  display: block;
-  transition: transform 0.3s ease;
 }
-
-.news-card__content {
-  padding: 1.25rem;
+.news-info {
+  padding: 20px;
+  position: relative;
+  padding-bottom: 68px;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  flex: 1;
 }
-
-.news-card__meta {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  color: #94a3b8;
-  font-size: 0.92rem;
+.news-date {
+  font-size: 13px;
+  color: #999;
+  margin-bottom: 8px;
 }
-
-.news-card__meta-icon {
-  display: inline-flex;
-  width: 1.2rem;
-  height: 1.2rem;
-  color: #94a3b8;
+.news-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 10px;
 }
-
-.news-card__headline {
-  margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.45;
-  font-weight: 700;
-  color: #0f172a;
+.news-desc {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   line-clamp: 2;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
+}
+.news-more {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #1e3a5f;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #06b6d4);
+    transition: width 0.3s ease;
+  }
+  &:hover {
+    color: transparent;
+    background-clip: text;
+    -webkit-background-clip: text;
+    background-image: linear-gradient(135deg, #3b82f6, #06b6d4);
+    &::after { width: 100%; }
+  }
 }
 
-@media (max-width: 1199px) {
-  .news-center__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.slide-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  border: none;
+  font-size: 28px;
+  font-weight: 300;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 2;
+  &:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: translateY(-50%) scale(1.05);
   }
+  &:active { transform: translateY(-50%) scale(0.96); }
+  &--prev { left: 16px; }
+  &--next { right: 16px; }
 }
 
-@media (max-width: 767px) {
-  .news-center {
-    padding: 3rem 0.75rem 2rem;
-  }
-
-  .news-center__header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .news-center__more {
-    align-self: flex-start;
-  }
-
-  .news-center__title {
-    font-size: 2rem;
-  }
-
-  .news-center__grid {
-    grid-template-columns: 1fr;
-  }
+@media (max-width: 768px) {
+  .slide-btn { width: 36px; height: 36px; font-size: 22px; }
+  .news-item { flex: 0 0 260px; width: 260px; }
+}
+@media (max-width: 992px) {
+  .news-item { flex: 0 0 300px; width: 300px; }
 }
 </style>

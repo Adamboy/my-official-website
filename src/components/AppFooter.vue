@@ -5,7 +5,7 @@
         <!-- 左侧：公司信息 + 快速链接 -->
         <div class="footer-left">
           <div class="brand">
-            <h2 class="brand-name">SkyLift</h2>
+            <h2 class="brand-name">融科</h2>
             <p class="brand-desc">
               专注工业无人机吊运解决方案，提供大载重、精准投放、全天候作业服务。
             </p>
@@ -26,28 +26,33 @@
         <div class="footer-right">
           <div class="right-item">
             <div class="item-label">全国服务热线</div>
-            <a href="tel:13380685782" class="hotline">13380685782</a>
+            <div v-if="loading" class="loading-placeholder">加载中...</div>
+            <div v-else-if="error" class="error-placeholder">{{ error }}</div>
+            <a v-else-if="publicInfo?.serviceHotline" :href="`tel:${publicInfo.serviceHotline}`" class="hotline">{{ publicInfo.serviceHotline }}</a>
+            <a v-else href="tel:13380685782" class="hotline">13380685782</a>
           </div>
           <div class="right-item">
             <div class="item-label">公司地址</div>
-            <div class="address">惠州市惠东县平山街道黄排社区高桥水地段</div>
+            <div v-if="loading" class="loading-placeholder">加载中...</div>
+            <div v-else-if="error" class="error-placeholder">{{ error }}</div>
+            <div v-else class="address">{{ publicInfo?.address || '惠州市惠东县平山街道黄排社区高桥水地段' }}</div>
           </div>
           <div class="right-item social">
             <div class="item-label">关注我们</div>
             <div class="social-icons">
               <div class="social-icon" @mouseenter="showQr('wechat')" @mouseleave="hideQr">
-                <img :src="wechatIcon" alt="微信" class="icon-img" />
+                <img :src="wechatIcon" alt="微信" class="icon-img" loading="lazy" />
                 <span>微信</span>
                 <div v-if="activeQr === 'wechat'" class="qr-popup">
-                  <img :src="wechatQrCode" alt="微信二维码" />
+                  <img :src="wechatQrCode" alt="微信二维码" loading="lazy" />
                   <span>扫一扫关注</span>
                 </div>
               </div>
               <div class="social-icon" @mouseenter="showQr('douyin')" @mouseleave="hideQr">
-                 <img :src="wechatIcon" alt="微信" class="icon-img" />
+                 <img :src="dyIcon" alt="抖音" class="icon-img" loading="lazy" />
                 <span>抖音</span>
                 <div v-if="activeQr === 'douyin'" class="qr-popup">
-                  <img :src="douyinQrCode" alt="抖音二维码" />
+                  <img :src="douyinQrCode" alt="抖音二维码" loading="lazy" />
                   <span>抖音扫码关注</span>
                 </div>
               </div>
@@ -64,16 +69,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { usePublicInfo } from '../composables/usePublicInfo'
 
 const currentYear = new Date().getFullYear()
 const activeQr = ref<string | null>(null)
 
-// 微信图标（你提供的链接）
-const wechatIcon = 'https://www.ykcore.cn/static/module/index/default/link_icon_01.png'
-// 二维码图片占位（请替换为真实地址）
-const wechatQrCode = 'https://via.placeholder.com/120x120?text=微信二维码'
-const douyinQrCode = 'https://via.placeholder.com/120x120?text=抖音二维码'
+const { publicInfo, loading, error, fetchPublicInfo } = usePublicInfo()
+
+// 静态图标路径（使用 Vite 别名）
+const wechatIcon = '@/assets/icon/link_icon_01.png'
+const dyIcon = '@/assets/icon/dy.png'
+
+// 动态二维码路径（使用公共信息数据）
+const wechatQrCode = ref('@/assets/icon/wechatma.png')
+const douyinQrCode = ref('@/assets/icon/dyma.png')
+
+onMounted(async () => {
+  await fetchPublicInfo()
+  // 更新二维码路径
+  if (publicInfo.value) {
+    if (publicInfo.value.wechatQrCode) {
+      wechatQrCode.value = publicInfo.value.wechatQrCode
+    }
+    if (publicInfo.value.douyinQrCode) {
+      douyinQrCode.value = publicInfo.value.douyinQrCode
+    }
+  }
+})
 
 const showQr = (type: string) => {
   activeQr.value = type
@@ -223,6 +246,18 @@ const hideQr = () => {
   color: #9ca3af;
 }
 
+.loading-placeholder {
+  color: #9ca3af;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.error-placeholder {
+  color: #ef4444;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
 .hotline {
   font-size: 1.3rem;
   font-weight: 600;
@@ -313,16 +348,18 @@ const hideQr = () => {
   left: 50%;
   transform: translateX(-50%);
   margin-bottom: 12px;
-  background: white;
+  background: rgba(255, 255, 255,1); 
   border-radius: 12px;
   padding: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  z-index: 100;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* 减少阴影强度 */
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   min-width: 120px;
+  border: 1px solid rgba(255, 255, 255, 0.2); /* 添加细边框增强定义 */
+  z-index: 10;
+  opacity: 1;
 }
 
 .qr-popup img {

@@ -114,7 +114,7 @@ onUnmounted(() => {
 <style lang="less" scoped>
 .faq-section {
   padding: 3rem 1.5rem;
-  background: #f7fbff;
+  background: white;
   color: #0f172a;
 }
 
