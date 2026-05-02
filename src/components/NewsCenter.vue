@@ -50,10 +50,22 @@
 </template>
 
 <script setup lang="ts">
+import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { getIndustryNews } from '../api/article'
+const router = useRouter() 
+// API 基础地址配置
+const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || (import.meta.env.DEV ? 'http://localhost:1337' : '')
+
+// 分类映射
+const categoryMap: Record<string, string> = {
+  company: '企业新闻',
+  public: '信息公示',
+  third: '第三方报道'
+}
 
 interface NewsItem {
-  id: number
+  id: any
   date: string
   title: string
   desc: string
@@ -61,56 +73,86 @@ interface NewsItem {
   category: string
 }
 
-const newsList = ref<NewsItem[]>([
-  {
-    id: 1,
-    date: '2026-04-15',
-    title: '大型光伏基地无人机吊运项目顺利完成验收',
-    desc: '本次吊运任务覆盖山区光伏板运输，有效提升施工效率，降低人工风险，获得甲方高度认可。',
-    cover: 'https://picsum.photos/600/400?random=1',
-    category: '项目案例'
-  },
-  {
-    id: 2,
-    date: '2026-04-10',
-    title: '新一代重型吊运无人机正式投入使用',
-    desc: '载重能力提升30%，续航更长，稳定性更强，适用于建材、光伏、工程应急等多种场景。',
-    cover: 'https://picsum.photos/600/400?random=2',
-    category: '公司动态'
-  },
-  {
-    id: 3,
-    date: '2026-04-05',
-    title: '甲乙双方安全作业规范培训会顺利召开',
-    desc: '会议明确现场作业流程、起降安全区域、时间确认机制及图片留证标准，强化安全管理。',
-    cover: 'https://picsum.photos/600/400?random=3',
-    category: '安全公告'
-  },
-  {
-    id: 4,
-    date: '2026-04-01',
-    title: '无人机吊运技术获行业创新应用奖项',
-    desc: '凭借高效、安全、环保的作业模式，在工程建设领域获得权威机构认可与表彰。',
-    cover: 'https://picsum.photos/600/400?random=4',
-    category: '行业资讯'
-  },
-  {
-    id: 5,
-    date: '2026-03-25',
-    title: '山区建材吊运项目圆满完成，效率提升显著',
-    desc: '针对复杂地形实施精准吊运，大幅减少人工搬运成本，缩短工期，获得合作方好评。',
-    cover: 'https://picsum.photos/600/400?random=5',
-    category: '项目案例'
-  },
-  {
-    id: 6,
-    date: '2026-03-20',
-    title: '行业新规发布：无人机吊运安全标准进一步升级',
-    desc: '公司积极响应政策，全面升级设备检测、人员培训与作业流程，确保合规安全运行。',
-    cover: 'https://picsum.photos/600/400?random=6',
-    category: '安全公告'
+const newsList = ref<NewsItem[]>([])
+const loading = ref(true)
+
+// 从接口获取新闻数据
+const fetchNews = async () => {
+  try {
+    loading.value = true
+    const response = await getIndustryNews({
+      type: '', // 获取所有类型
+      page: 1,
+      pageSize: 10
+    })
+    
+    if (response.data && Array.isArray(response.data)) {
+      newsList.value = response.data.map((item: any) => ({
+        id: item.documentId,
+        date: item.pushDate || new Date().toISOString().split('T')[0],
+        title: item.title || '无标题',
+        desc: item.summary || '',
+        cover: item.newImageUrl?.url ? `${API_BASE_URL}${item.newImageUrl.url}` : '',
+        category: categoryMap[item.type] || '企业新闻'
+      }))
+    }
+  } catch (error) {
+    console.error('获取新闻数据失败:', error)
+    // 使用默认数据作为降级
+    newsList.value = [
+      {
+        id: 1,
+        date: '2026-04-15',
+        title: '大型光伏基地无人机吊运项目顺利完成验收',
+        desc: '本次吊运任务覆盖山区光伏板运输，有效提升施工效率，降低人工风险，获得甲方高度认可。',
+        cover: 'https://picsum.photos/600/400?random=1',
+        category: '项目案例'
+      },
+      {
+        id: 2,
+        date: '2026-04-10',
+        title: '新一代重型吊运无人机正式投入使用',
+        desc: '载重能力提升30%，续航更长，稳定性更强，适用于建材、光伏、工程应急等多种场景。',
+        cover: 'https://picsum.photos/600/400?random=2',
+        category: '公司动态'
+      },
+      {
+        id: 3,
+        date: '2026-04-05',
+        title: '甲乙双方安全作业规范培训会顺利召开',
+        desc: '会议明确现场作业流程、起降安全区域、时间确认机制及图片留证标准，强化安全管理。',
+        cover: 'https://picsum.photos/600/400?random=3',
+        category: '安全公告'
+      },
+      {
+        id: 4,
+        date: '2026-04-01',
+        title: '无人机吊运技术获行业创新应用奖项',
+        desc: '凭借高效、安全、环保的作业模式，在工程建设领域获得权威机构认可与表彰。',
+        cover: 'https://picsum.photos/600/400?random=4',
+        category: '行业资讯'
+      },
+      {
+        id: 5,
+        date: '2026-03-25',
+        title: '山区建材吊运项目圆满完成，效率提升显著',
+        desc: '针对复杂地形实施精准吊运，大幅减少人工搬运成本，缩短工期，获得合作方好评。',
+        cover: 'https://picsum.photos/600/400?random=5',
+        category: '项目案例'
+      },
+      {
+        id: 6,
+        date: '2026-03-20',
+        title: '行业新规发布：无人机吊运安全标准进一步升级',
+        desc: '公司积极响应政策，全面升级设备检测、人员培训与作业流程，确保合规安全运行。',
+        cover: 'https://picsum.photos/600/400?random=6',
+        category: '安全公告'
+      }
+    ]
+  } finally {
+    loading.value = false
   }
-])
+}
 
 const newsTrackRef = ref<HTMLElement | null>(null)
 const isPaused = ref(false)
@@ -127,7 +169,6 @@ let transitionTimer: ReturnType<typeof setTimeout> | null = null
 let activeTransitionEndHandler: (() => void) | null = null
 
 const duplicatedNews = computed(() => [...newsList.value, ...newsList.value])
-
 /** 获取单个卡片宽度 + gap (步长) */
 const getStepDistance = (): number => {
   if (!newsTrackRef.value) return 350
@@ -255,6 +296,7 @@ const handleImageLoad = () => {
 
 const handleDetail = (_item: NewsItem) => {
   // 可替换为实际路由跳转
+   router.push({ name: 'news-detail', params: { id: _item.id } });
 }
 
 /** 自动滚动（逐帧平滑，无过渡） */
@@ -293,7 +335,8 @@ const handleResize = () => {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchNews()
   startAutoScroll()
   window.addEventListener('resize', handleResize)
   if (newsTrackRef.value && window.ResizeObserver) {

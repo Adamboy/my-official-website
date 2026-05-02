@@ -26,16 +26,12 @@
         <div class="footer-right">
           <div class="right-item">
             <div class="item-label">全国服务热线</div>
-            <div v-if="loading" class="loading-placeholder">加载中...</div>
-            <div v-else-if="error" class="error-placeholder">{{ error }}</div>
-            <a v-else-if="publicInfo?.serviceHotline" :href="`tel:${publicInfo.serviceHotline}`" class="hotline">{{ publicInfo.serviceHotline }}</a>
+            <a v-if="publicInfo?.serviceHotline" :href="`tel:${publicInfo.serviceHotline}`" class="hotline">{{ publicInfo.serviceHotline }}</a>
             <a v-else href="tel:13380685782" class="hotline">13380685782</a>
           </div>
           <div class="right-item">
             <div class="item-label">公司地址</div>
-            <div v-if="loading" class="loading-placeholder">加载中...</div>
-            <div v-else-if="error" class="error-placeholder">{{ error }}</div>
-            <div v-else class="address">{{ publicInfo?.address || '惠州市惠东县平山街道黄排社区高桥水地段' }}</div>
+            <div class="address">{{ publicInfo?.address || '惠州市惠东县平山街道黄排社区高桥水地段' }}</div>
           </div>
           <div class="right-item social">
             <div class="item-label">关注我们</div>
@@ -62,7 +58,7 @@
       </div>
 
       <div class="footer-copyright">
-        <p>&copy; {{ currentYear }} 惠州融科低空科技有限公司 | All Rights Reserved</p>
+        <p>&copy; {{ currentYear }} 惠州融科低空科技有限公司</p>
       </div>
     </div>
   </footer>
@@ -74,26 +70,25 @@ import { usePublicInfo } from '../composables/usePublicInfo'
 
 const currentYear = new Date().getFullYear()
 const activeQr = ref<string | null>(null)
+import wechatIcon from '@/assets/icon/link_icon_01.png'
+import dyIcon from '@/assets/icon/dy.png'
+const { publicInfo, fetchPublicInfo } = usePublicInfo()
 
-const { publicInfo, loading, error, fetchPublicInfo } = usePublicInfo()
-
-// 静态图标路径（使用 Vite 别名）
-const wechatIcon = '@/assets/icon/link_icon_01.png'
-const dyIcon = '@/assets/icon/dy.png'
-
+// API 基础地址配置
+const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || (import.meta.env.DEV ? 'http://localhost:1337' : '')
 // 动态二维码路径（使用公共信息数据）
 const wechatQrCode = ref('@/assets/icon/wechatma.png')
 const douyinQrCode = ref('@/assets/icon/dyma.png')
 
 onMounted(async () => {
-  await fetchPublicInfo()
-  // 更新二维码路径
+  await fetchPublicInfo() 
+  // 更新二维码路径（拼接 API 基础 URL）
   if (publicInfo.value) {
     if (publicInfo.value.wechatQrCode) {
-      wechatQrCode.value = publicInfo.value.wechatQrCode
+      wechatQrCode.value = `${API_BASE_URL}${publicInfo.value.wechatQrCode}`
     }
     if (publicInfo.value.douyinQrCode) {
-      douyinQrCode.value = publicInfo.value.douyinQrCode
+      douyinQrCode.value = `${API_BASE_URL}${publicInfo.value.douyinQrCode}`
     }
   }
 })

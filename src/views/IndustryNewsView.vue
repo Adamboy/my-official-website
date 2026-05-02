@@ -20,7 +20,7 @@
           </div>
           <h3>{{ item.title }}</h3>
           <p>{{ item.summary }}</p>
-          <router-link :to="item.link" class="news-link">阅读全文</router-link>
+          <router-link :to="`/news/${item.id}`" class="news-link">阅读全文</router-link>
         </article>
       </div>
 
@@ -91,7 +91,7 @@ const news = computed((): NewsItem[] => {
 
   return industryNewsData.value.map((item: any) => {
     return {
-      id: item.id,
+      id:item.documentId,
       category: item.type || "company",
       tag: tagMap[item.type] || "企业新闻",
       date: item.pushDate || new Date().toISOString().split('T')[0],

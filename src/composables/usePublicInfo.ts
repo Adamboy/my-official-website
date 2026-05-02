@@ -58,8 +58,9 @@ export const usePublicInfo = () => {
           phone: attributes.phone,
           email: attributes.email,
           address: attributes.address,
-          wechatQrCode: attributes.wechatQrCode?.data?.attributes?.url,
-          douyinQrCode: attributes.douyinQrCode?.data?.attributes?.url,
+          // 处理图片URL - 直接从对象获取url字段
+          wechatQrCode: attributes.wechatQrCode?.url,
+          douyinQrCode: attributes.douyinQrCode?.url,
           serviceHotline: attributes.serviceHotline,
           socialMedia: attributes.socialMedia
         }

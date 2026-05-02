@@ -70,3 +70,14 @@ export const getIndustryNews = (params: {
     params: queryParams,
   });
 };
+
+// 获取新闻详情（包含 detail_blocks）
+export const getNewsDetail = (id: string) => {  // 改 string
+  return request({
+ url: `/news-centers/${id}?populate[newImageUrl]=true&populate[detail_blocks][populate]=*`,
+    method: 'GET',
+  });
+};
+
+  //  url: `/news-centers/${id}?populate[detail_blocks][populate]=*`,
+    // url: `/news-centers/${id}?populate=*`,

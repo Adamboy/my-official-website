@@ -1,10 +1,6 @@
 <template>
   <div class="news-detail-page">
-    <SceneBanner
-      title="新闻详情"
-      subtitle="深入解读空吊绞盘行业最新案例与技术趋势"
-      watermark="NEWS"
-    />
+    <SceneBanner title="新闻详情" subtitle="深入解读空吊绞盘行业最新案例与技术趋势" watermark="NEWS" />
 
     <div class="container">
       <div class="breadcrumb">
@@ -12,50 +8,62 @@
         <span>/</span>
         <router-link to="/news">行业新闻</router-link>
         <span>/</span>
-        <span>{{ article.title }}</span>
+        <span>{{ articleData.title }}</span>
       </div>
 
       <div class="article-layout">
         <main class="article-main">
           <article class="article-card">
             <div class="article-header">
-              <span class="article-tag">{{ article.tag }}</span>
-              <h1>{{ article.title }}</h1>
+              <span class="article-tag">{{ articleData.tag }}</span>
+              <h1>{{ articleData.title }}</h1>
               <div class="article-meta">
-                <span>{{ article.date }}</span>
+                <span>{{ articleData.date }}</span>
                 <span>•</span>
-                <span>{{ article.author }}</span>
+                <span>{{ articleData.author }}</span>
                 <span>•</span>
-                <span>{{ article.readTime }}</span>
+                <span>{{ articleData.readTime }}</span>
               </div>
-              <p class="article-lead">{{ article.intro }}</p>
-              <div class="article-cover">
-                <img :src="article.cover" :alt="article.title" loading="lazy" />
+              <p class="article-lead">{{ articleData.intro }}</p>
+              <div class="article-cover" v-if="articleData.cover">
+                <img :src="articleData.cover" :alt="articleData.title" loading="lazy" />
               </div>
             </div>
 
             <div class="article-body">
-              <section
-                class="article-section"
-                v-for="(section, index) in article.sections"
-                :key="index"
-              >
-                <h2>{{ section.heading }}</h2>
-                <p v-for="(paragraph, idx) in section.content" :key="idx">
-                  {{ paragraph }}
-                </p>
-                <ul v-if="section.points">
-                  <li v-for="(point, idx) in section.points" :key="idx">
-                    {{ point }}
-                  </li>
-                </ul>
-              </section>
+              <!-- 根据 detail_blocks 动态渲染内容 -->
+               {{}}
+              <div v-for="(block, index) in articleData.detailBlocks" :key="index" class="detail-block">
+                <!-- 文本块 -->
+                <section v-if="block.__component === 'text-block.text-block'" class="article-section">
+                  <h2>{{ block.title }}</h2>
+                  <p>{{ block.content }}</p>
+                </section>
 
-              <blockquote class="article-quote">{{ article.quote }}</blockquote>
+                <!-- 纯文本 -->
+                <section v-else-if="block.__component === 'only-text.only-text'" class="article-section">
+                  <p>{{ block.text }}</p>
+                </section>
 
-              <section class="article-section">
+                <!-- 图片块 -->
+                <section v-else-if="block.__component === 'image-block.image-block'" class="article-section">
+                  <div class="article-image-block">
+                    <img :src="block.imageUrl?.url ? `${API_BASE_URL}${block.imageUrl.url}` : ''" :alt="block.caption || ''" loading="lazy" />
+                    <span v-if="block.caption" class="image-caption">{{ block.caption }}</span>
+                  </div>
+                </section>
+
+                <!-- 富文本 -->
+                <section v-else-if="block.__component === 'rich-text.rich-text'" class="article-section">
+                  <h2>{{ block.title }}</h2>
+                  <div class="rich-text-content" v-html="renderRichText(block.richText || [])"></div>
+                </section>
+              </div>
+
+              <!-- 默认段落 -->
+              <section class="article-section" v-if="articleData.conclusion">
                 <h2>项目价值与未来展望</h2>
-                <p>{{ article.conclusion }}</p>
+                <p>{{ articleData.conclusion }}</p>
               </section>
             </div>
           </article>
@@ -66,14 +74,47 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, onMounted } from "vue";
 import { useRoute } from 'vue-router'
 import SceneBanner from '../components/SceneBanner.vue'
+import { getNewsDetail } from '../api/article';
 
-const pdfCover = new URL('../assets/pdf_images/pdf_image_page1_1.jpg', import.meta.url).href
+// API 基础地址配置
+const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || (import.meta.env.DEV ? 'http://localhost:1337' : '')
 
-type NewsArticle = {
+// 分类映射
+const categoryMap: Record<string, string> = {
+  company: '企业新闻',
+  public: '信息公示',
+  third: '第三方报道'
+}
+
+// 文章数据类型
+interface DetailBlock {
+  __component: string
   id: number
+  title?: string
+  content?: string
+  text?: string
+  caption?: string
+  captions?: string[]
+  imageUrl?: {
+    url: string
+  }
+  richText?: Array<{
+    type: string
+    children: Array<{
+      type: string
+      text: string
+      italic?: boolean
+    }>
+    format?: string
+    level?: number
+  }>
+}
+
+interface ArticleData {
+  id: any
   tag: string
   date: string
   author: string
@@ -81,162 +122,116 @@ type NewsArticle = {
   title: string
   intro: string
   cover: string
-  sections: Array<{ heading: string; content: string[]; points?: string[] }>
-  quote: string
+  detailBlocks: DetailBlock[]
   conclusion: string
-  tags: string[]
 }
 
 const route = useRoute()
-const articleId = Number(route.params.id || 1)
+const articleId = route.params.id as string
 
-const articles: NewsArticle[] = [
-  {
-    id: 1,
-    tag: '技术升级',
-    date: '2026-04-10',
-    author: '易载航空研究员',
-    readTime: '阅读 4 分钟',
-    title: '智能绞盘系统助力无人机吊运进入新阶段',
-    intro:
-      '通过自动化控制与远程监测，绞盘作业精度进一步提升，行业施工效率显著提高。本文解读典型应用案例、核心技术优势与落地价值。',
-    cover: 'https://picsum.photos/id/1018/1200/700',
-    sections: [
-      {
-        heading: '背景概述',
-        content: [
-          '近年来，无人机空吊绞盘在高层建筑、桥梁施工与应急抢险领域获得了快速推广。面对复杂环境，智能控制与远程诊断成为应用关键。',
-          '本次案例聚焦一种具备高精度张力控制、自动避障和全天候运行能力的智能绞盘系统。'
-        ]
-      },
-      {
-        heading: '技术亮点',
-        content: [
-          '该系统通过动态负载调节与同步张力控制，将吊运误差控制在毫米级。配合边缘计算设备，可在现场实时分析作业状态并自动调整参数。'
-        ],
-        points: [
-          '一体化云端监控与故障预警',
-          '模块化防护设计支持雨雪环境作业',
-          '支持多平台任务协同，提升施工效率'
-        ]
-      },
-      {
-        heading: '落地成果',
-        content: [
-          '实际项目中，智能绞盘系统将吊运周期缩短了 18%，同时累计节省现场人力成本 21%。项目现场运行期间未发生一次安全事故，整体作业稳定性显著提升。'
-        ]
+// 文章数据
+const articleData = ref<ArticleData>({
+  id: 0,
+  tag: '企业新闻',
+  date: '',
+  author: '融科低空官方',
+  readTime: '阅读 3 分钟',
+  title: '',
+  intro: '',
+  cover: '',
+  detailBlocks: [],
+  conclusion: ''
+})
+
+// 渲染富文本
+const renderRichText = (richText: any[]): string => {
+  if (!richText || !Array.isArray(richText)) return ''
+  
+  return richText.map((block) => {
+    if (block.type === 'paragraph') {
+      const text = block.children?.map((child: any) => {
+        if (child.italic) {
+          return `<em>${child.text || ''}</em>`
+        }
+        return child.text || ''
+      }).join('')
+      return `<p>${text}</p>`
+    } else if (block.type === 'heading') {
+      const level = block.level || 1
+      const text = block.children?.map((child: any) => child.text || '').join('')
+      return `<h${level + 1}>${text}</h${level + 1}>`
+    } else if (block.type === 'list') {
+      const listItems = block.children?.map((item: any) => {
+        const itemText = item.children?.map((child: any) => child.text || '').join('')
+        return `<li>${itemText}</li>`
+      }).join('')
+      return `<ul>${listItems}</ul>`
+    }
+    return ''
+  }).join('')
+}
+
+// 获取新闻详情
+const fetchData = async () => {
+  try {
+    const response = await getNewsDetail(articleId)
+    
+    if (response.data) {
+      const data = response.data
+      
+      articleData.value = {
+        id: data.id,
+        tag: categoryMap[data.type] || '企业新闻',
+        date: data.pushDate || new Date().toISOString().split('T')[0],
+        author: '融科低空官方',
+        readTime: '阅读 3 分钟',
+        title: data.title || '无标题',
+        intro: data.summary || '',
+        cover: data.newImageUrl?.url ? `${API_BASE_URL}${data.newImageUrl.url}` : '',
+        detailBlocks: data.detail_blocks || [],
+        conclusion: ''
       }
-    ],
-    quote:
-      '“当技术与场景深度结合，空吊绞盘不仅是工具，更成为施工效率与安全管理的核心。”',
-    conclusion:
-      '进入 2026 年，行业对智能化、可视化绞盘系统的需求愈发明确。未来，更多项目将在“轻量化、智能化、协同化”方向展开，推动空吊业务从单点作业向全链路解决方案转型。',
-    tags: ['智能绞盘', '无人机吊运', '施工效率', '安全控制']
-  },
-  {
-    id: 2,
-    tag: '市场热点',
-    date: '2026-04-08',
-    author: '行业分析师',
-    readTime: '阅读 3 分钟',
-    title: '城市旧楼改造需求推动空吊服务快速增长',
-    intro:
-      '随着城市更新计划加速，轻量化空吊服务在旧楼改造中的应用愈发广泛。本文分析市场驱动因素与最佳实践。',
-    cover: 'https://picsum.photos/id/1027/1200/700',
-    sections: [
-      {
-        heading: '市场趋势',
-        content: [
-          '城市更新与旧楼改造对施工灵活性、现场占地和噪声控制提出了更高要求。空吊绞盘以低扰动、快速部署的优势在改造现场获得青睐。'
-        ]
-      },
-      {
-        heading: '典型应用',
-        content: [
-          '案例显示，通过无人机空吊设备进行材料运输与小型构件吊装，可以避免大型机械进场，降低对周边社区的影响。'
-        ],
-        points: ['减少地面施工占用', '提高拆装节奏', '改善施工安全管理']
-      }
-    ],
-    quote:
-      '“在城市更新中，空吊服务成为空间受限环境下最灵活的施工方式之一。”',
-    conclusion:
-      '未来，城市旧楼改造项目将持续成为空吊服务的重要增长点，企业需在产品轻量化与服务响应速度上下功夫。',
-    tags: ['城市更新', '旧楼改造', '空吊服务']
-  },
-  {
-    id: 3,
-    tag: '案例分享',
-    date: '2026-04-05',
-    author: '项目经理',
-    readTime: '阅读 3 分钟',
-    title: '高层住宅吊装项目：安全与速度如何兼得？',
-    intro:
-      '本案例总结高层住宅吊装作业的关键控制点，展示了技术优化和现场协同如何保障速度与安全并重。',
-    cover: 'https://picsum.photos/id/1039/1200/700',
-    sections: [
-      {
-        heading: '项目挑战',
-        content: [
-          '高层住宅吊装现场空间紧凑、风速变化快，传统大型吊机难以满足快速切换与场地适应需求。'
-        ]
-      },
-      {
-        heading: '解决方案',
-        content: [
-          '采用无人机空吊绞盘结合模块化索具，实现快速搭建与精确吊运。现场调度依托实时数据监控，动态调整吊运方案。'
-        ],
-        points: ['构件精准定位', '快速方案切换', '可视化安全监测']
-      }
-    ],
-    quote:
-      '“在高层吊装中，安全管理和任务速度不是对立，而是需要同样重视的两个核心指标。”',
-    conclusion:
-      '该项目证明了现代空吊技术在高层住宅建设中的可行性，未来类项目将更多依赖智能化吊装方案来兼顾施工进度与安全风险。',
-    tags: ['高层吊装', '现场协同', '安全管理']
-    },
-    {
-      id: 4,
-      tag: '资质案例',
-      date: '2026-04-15',
+    }
+  } catch (error) {
+    console.error('获取新闻详情失败:', error)
+    // 使用默认数据作为降级
+    articleData.value = {
+      id: articleId,
+      tag: '企业新闻',
+      date: '2026-04-10',
       author: '融科低空官方',
       readTime: '阅读 3 分钟',
       title: '融科低空：资质与无人机吊运服务能力全景介绍',
-      intro:
-        '通过中铁建工委托函、CAAC运营合格证与低空经济业务备案，展示公司在无人机吊运工程、培训与综合服务方面的合法能力与项目实力。',
-      cover: pdfCover,
-      sections: [
+      intro: '通过中铁建工委托函、CAAC运营合格证与低空经济业务备案，展示公司在无人机吊运工程、培训与综合服务方面的合法能力与项目实力',
+      cover: '',
+      detailBlocks: [
         {
-          heading: '授权与委托案例',
-          content: [
-            '中铁建工集团及其分包方河南明城建筑出具的无人机吊运作业委托函，确认了惠州市融科低空科技有限公司在广州番禺区开展水泥沙石吊运的服务内容与作业时间。',
-            '该委托函明确了作业空域、高度等合规要求，并由委托单位盖章确认，体现了真实项目的服务能力。'
-          ]
+          __component: 'text-block.text-block',
+          id: 1,
+          title: '授权与委托案例',
+          content: '中铁建工集团及其分包方河南明城建筑出具的无人机吊运作业委托函，确认了惠州市融科低空科技有限公司在广州番禺区开展水泥沙石吊运的服务内容与作业时间。'
         },
         {
-          heading: '核心合规资质',
-          content: [
-            '融科低空拥有中国民用航空局（CAAC）颁发的民用无人驾驶航空器运营合格证，编号 UAOC-0-HQ-20250802011。',
-            '证书支持留空飞行、航线飞行、其他飞行，以及载货类（吊运）、培训类和其他类运营类型，具备法定商业运营资格。'
-          ]
+          __component: 'only-text.only-text',
+          id: 2,
+          text: '该委托函明确了作业空域、高度等合规要求，并由委托单位盖章确认，体现了真实项目的服务能力。'
         },
         {
-          heading: '业务能力与服务范围',
-          content: [
-            '公司业务备案信息表显示其具备无人机研发设计、运营服务、整机租赁、飞手培训、解决方案和咨询服务等多元能力。'
-          ],
-          points: ['农业植保与农业吊运', '光伏板吊运与工程吊运', '铁塔吊运与高空吊装', '合法空域培训场地与专业装备']
+          __component: 'text-block.text-block',
+          id: 3,
+          title: '核心合规资质',
+          content: '融科低空拥有中国民用航空局（CAAC）颁发的民用无人驾驶航空器运营合格证。'
         }
       ],
-      quote:
-        '“合法资质是无人机商务运营的核心，真实项目案例是服务能力的最好证明。”',
-      conclusion:
-        '融科低空凭借完整资质与真实项目案例，为无人机吊运工程的合规开展、现场安全和服务交付提供了有力支撑。',
-      tags: ['无人机吊运', '资质合规', '项目案例']
+      conclusion: ''
     }
-  ]
+  }
+}
 
-const article = computed(() => articles.find((item) => item.id === articleId) || articles[0])
+onMounted(() => {
+  fetchData();
+  console.log('我只想了')
+});
 </script>
 
 <style lang="less" scoped>
@@ -389,6 +384,43 @@ const article = computed(() => articles.find((item) => item.id === articleId) ||
   color: #0f172a;
   font-style: italic;
   border-radius: 1.2rem;
+}
+
+/* 图片块样式 */
+.article-image-block {
+  margin: 1.5rem 0;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.article-image-block img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.image-caption {
+  display: block;
+  text-align: center;
+  padding: 0.8rem 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  background: #f8fafc;
+}
+
+/* 富文本内容样式 */
+.rich-text-content {
+  line-height: 2;
+  color: #334155;
+}
+
+.rich-text-content p {
+  margin-bottom: 1.25rem;
+}
+
+/* 详情块间距 */
+.detail-block {
+  margin-bottom: 2.8rem;
 }
 
 @media (max-width: 900px) {
