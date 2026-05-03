@@ -7,7 +7,7 @@
         <p>我们的专业团队可为您评估工地环境、制定吊运方案，并在最短时间内安排施工。</p>
       </div>
       <div class="cta-actions">
-        <a class="btn btn-primary" href="tel:400-123-4567">拨打咨询电话</a>
+        <!-- <a class="btn btn-primary" href="tel:400-123-4567">拨打咨询电话</a> -->
         <router-link to="/contact" class="btn btn-outline">在线留言</router-link>
       </div>
     </div>

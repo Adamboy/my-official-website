@@ -410,6 +410,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow: hidden;
 }
 
 .news-date {
@@ -420,27 +421,35 @@ onUnmounted(() => {
 
 .news-title {
   font-size: 1.25rem;
-  font-weight: bold;
+  font-weight: 700;
   color: #222;
-  margin-bottom: 10px;
-  line-height: 1.6;
-  overflow: hidden;
+  margin: 0 0 10px;
+  line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
   text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  flex-shrink: 0;
+  min-height: calc(1.5em * 2);
 }
 
 .news-desc {
   font-size: 14px;
   color: #666;
-  margin-bottom: 15px;
+  margin: 0;
+  line-height: 1.6;
   display: -webkit-box;
-  line-clamp: 3;
-  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
   overflow: hidden;
-  flex: 1;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  flex: 0 0 auto;
+  min-height: calc(1.6em * 3);
 }
 
 .news-more {
