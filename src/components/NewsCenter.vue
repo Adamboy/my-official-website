@@ -423,7 +423,6 @@ onUnmounted(() => {
   color: #222;
   margin-bottom: 10px;
   line-height: 1.6;
-  height: 4.8rem;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
