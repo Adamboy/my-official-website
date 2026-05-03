@@ -397,11 +397,14 @@ onUnmounted(() => {
 .news-item {
   flex: 0 0 330px;
   width: 330px;
+  height: 520px;
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
   &:hover {
     transform: translateY(-6px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
@@ -414,8 +417,6 @@ onUnmounted(() => {
 }
 .news-info {
   padding: 20px;
-  position: relative;
-  padding-bottom: 68px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -431,7 +432,6 @@ onUnmounted(() => {
   color: #222;
   margin-bottom: 10px;
   line-height: 1.6;
-  height: 4.8rem;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -450,9 +450,8 @@ onUnmounted(() => {
   flex: 1;
 }
 .news-more {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
+  margin-top: auto;
+  align-self: flex-end;
   padding: 8px 14px;
   border-radius: 999px;
   color: #1e3a5f;
