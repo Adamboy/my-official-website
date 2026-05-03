@@ -8,30 +8,11 @@
       </div>
 
       <div class="news-list-wrapper">
-        <div 
-          class="news-list" 
-          @mouseenter="pauseScroll" 
-          @mouseleave="resumeScroll"
-          @touchstart="pauseScroll"
-          @touchend="resumeScroll"
-        >
-          <div 
-            ref="newsTrackRef" 
-            class="news-track" 
-            :class="{ 'smooth-transition': enableTransition }"
-          >
-            <article 
-              v-for="(item, idx) in duplicatedNews" 
-              :key="`${item.id}-${idx}`" 
-              class="news-item"
-            >
-              <img 
-                :src="item.cover" 
-                class="news-img" 
-                :alt="item.title" 
-                loading="lazy" 
-                @load="handleImageLoad"
-              />
+        <div class="news-list" @mouseenter="pauseScroll" @mouseleave="resumeScroll" @touchstart="pauseScroll"
+          @touchend="resumeScroll">
+          <div ref="newsTrackRef" class="news-track" :class="{ 'smooth-transition': enableTransition }">
+            <article v-for="(item, idx) in duplicatedNews" :key="`${item.id}-${idx}`" class="news-item">
+              <img :src="item.cover" class="news-img" :alt="item.title" loading="lazy" @load="handleImageLoad" />
               <div class="news-info">
                 <div class="news-date">{{ item.date }}</div>
                 <h3 class="news-title">{{ item.title }}</h3>
@@ -41,7 +22,7 @@
             </article>
           </div>
         </div>
-        
+
         <button class="slide-btn slide-btn--prev" @click="slidePrev" aria-label="上一组">←</button>
         <button class="slide-btn slide-btn--next" @click="slideNext" aria-label="下一组">→</button>
       </div>
@@ -53,7 +34,7 @@
 import { useRouter } from 'vue-router'
 import { computed, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { getIndustryNews } from '../api/article'
-const router = useRouter() 
+const router = useRouter()
 // API 基础地址配置
 const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || (import.meta.env.DEV ? 'http://localhost:1337' : '')
 
@@ -85,7 +66,7 @@ const fetchNews = async () => {
       page: 1,
       pageSize: 10
     })
-    
+
     if (response.data && Array.isArray(response.data)) {
       newsList.value = response.data.map((item: any) => ({
         id: item.documentId,
@@ -296,7 +277,7 @@ const handleImageLoad = () => {
 
 const handleDetail = (_item: NewsItem) => {
   // 可替换为实际路由跳转
-   router.push({ name: 'news-detail', params: { id: _item.id } });
+  router.push({ name: 'news-detail', params: { id: _item.id } });
 }
 
 /** 自动滚动（逐帧平滑，无过渡） */
@@ -359,15 +340,18 @@ onUnmounted(() => {
 .news-center {
   background: white;
 }
+
 .news-center__inner {
   margin: 0 auto;
   padding: 2rem 0;
 }
+
 .news-center__header {
   display: flex;
   justify-content: center;
   margin-bottom: 2rem;
 }
+
 .news-center__eyebrow {
   font-size: 1.95rem;
   font-weight: 700;
@@ -378,10 +362,12 @@ onUnmounted(() => {
 .news-list-wrapper {
   position: relative;
 }
+
 .news-list {
   overflow: hidden;
   width: 100%;
 }
+
 .news-track {
   display: flex;
   gap: 20px;
@@ -390,6 +376,7 @@ onUnmounted(() => {
   will-change: transform;
   padding: 12px 0;
 }
+
 .news-track.smooth-transition {
   transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
@@ -397,61 +384,69 @@ onUnmounted(() => {
 .news-item {
   flex: 0 0 330px;
   width: 330px;
-  height: 520px;
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
+
   &:hover {
     transform: translateY(-6px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   }
 }
+
 .news-img {
   width: 100%;
   height: 200px;
   object-fit: cover;
 }
+
 .news-info {
   padding: 20px;
+  position: relative;
+  padding-bottom: 68px;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
+
 .news-date {
   font-size: 13px;
   color: #999;
   margin-bottom: 8px;
 }
+
 .news-title {
-  font-size: 18px;
+  font-size: 1.25rem;
   font-weight: bold;
   color: #222;
   margin-bottom: 10px;
   line-height: 1.6;
+  height: 4.8rem;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   text-overflow: ellipsis;
 }
+
 .news-desc {
   font-size: 14px;
   color: #666;
   margin-bottom: 15px;
   display: -webkit-box;
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
 }
+
 .news-more {
-  margin-top: auto;
-  align-self: flex-end;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
   padding: 8px 14px;
   border-radius: 999px;
   color: #1e3a5f;
@@ -459,6 +454,7 @@ onUnmounted(() => {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
+
   &::after {
     content: '';
     position: absolute;
@@ -469,12 +465,16 @@ onUnmounted(() => {
     background: linear-gradient(90deg, #3b82f6, #06b6d4);
     transition: width 0.3s ease;
   }
+
   &:hover {
     color: transparent;
     background-clip: text;
     -webkit-background-clip: text;
     background-image: linear-gradient(135deg, #3b82f6, #06b6d4);
-    &::after { width: 100%; }
+
+    &::after {
+      width: 100%;
+    }
   }
 }
 
@@ -497,20 +497,42 @@ onUnmounted(() => {
   justify-content: center;
   transition: all 0.2s ease;
   z-index: 2;
+
   &:hover {
     background: rgba(255, 255, 255, 0.6);
     transform: translateY(-50%) scale(1.05);
   }
-  &:active { transform: translateY(-50%) scale(0.96); }
-  &--prev { left: 16px; }
-  &--next { right: 16px; }
+
+  &:active {
+    transform: translateY(-50%) scale(0.96);
+  }
+
+  &--prev {
+    left: 16px;
+  }
+
+  &--next {
+    right: 16px;
+  }
 }
 
 @media (max-width: 768px) {
-  .slide-btn { width: 36px; height: 36px; font-size: 22px; }
-  .news-item { flex: 0 0 260px; width: 260px; }
+  .slide-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 22px;
+  }
+
+  .news-item {
+    flex: 0 0 260px;
+    width: 260px;
+  }
 }
+
 @media (max-width: 992px) {
-  .news-item { flex: 0 0 300px; width: 300px; }
+  .news-item {
+    flex: 0 0 300px;
+    width: 300px;
+  }
 }
 </style>
