@@ -407,10 +407,11 @@ onUnmounted(() => {
 
 .news-info {
   padding: 20px;
+  position: relative;
+  padding-bottom: 68px;
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow: hidden;
 }
 
 .news-date {
@@ -425,13 +426,16 @@ onUnmounted(() => {
   color: #222;
   margin: 0 0 10px;
   line-height: 1.5;
+  /* 强制开启多行省略，不受 flex 影响 */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 禁止长单词撑破布局 */
   overflow-wrap: break-word;
   word-wrap: break-word;
+  /* 关键：禁止父级 flex 强制拉伸 */
   flex-shrink: 0;
   min-height: calc(1.5em * 2);
 }
@@ -441,20 +445,35 @@ onUnmounted(() => {
   color: #666;
   margin: 0;
   line-height: 1.6;
+  /* 强制开启多行省略，不受 flex 影响 */
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
   overflow: hidden;
   text-overflow: ellipsis;
+  /* 禁止长单词撑破布局 */
   overflow-wrap: break-word;
   word-wrap: break-word;
+  /* 关键：不参与父级 flex 分配，避免被挤压 */
   flex: 0 0 auto;
   min-height: calc(1.6em * 3);
 }
 
+.news-info {
+  padding: 20px;
+  position: relative;
+  padding-bottom: 68px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* 关键：限制内容高度，避免溢出 */
+  overflow: hidden;
+}
+
 .news-more {
-  margin-top: auto;
-  align-self: flex-end;
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
   padding: 8px 14px;
   border-radius: 999px;
   color: #1e3a5f;
