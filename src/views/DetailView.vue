@@ -37,29 +37,63 @@
         </section>
       </div>
 
-            <div class="detail-cta">
-              <div class="cta-copy">
-                <h2>选择无人机吊运，开启高效施工新方式</h2>
-                <p>我们为复杂场景提供专业空运方案，减少人工转运，缩短施工周期，提升安全可控性。</p>
-              </div>
-              <router-link to="/" class="btn btn-primary">立即咨询</router-link>
-            </div>
+      <div class="detail-cta">
+        <div class="cta-copy">
+          <h2>选择无人机吊运，开启高效施工新方式</h2>
+          <p>我们为复杂场景提供专业空运方案，减少人工转运，缩短施工周期，提升安全可控性。</p>
+        </div>
+        <router-link to="/" class="btn btn-primary">立即咨询</router-link>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import SceneBanner from '../components/SceneBanner.vue'
 import scenarios from '@/data/scenarios.ts'
+import { getApplicationCase } from '../api/article'
+
+// API 基础地址配置（与原代码保持一致）
+const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || (import.meta.env.DEV ? 'http://localhost:1337' : '')
 
 const route = useRoute()
+const id = String(route.params.id)
 
-// ✅ 使用 any 类型断言支持动态字符串索引
-const scenario = computed(() => {
-  const id = String(route.params.id)
-  return (scenarios as any)[id] || (scenarios as any)['city-old']
+// 静态数据作为基准（包含所有文字内容和占位图片）
+const scenario = ref((scenarios as any)[id] || (scenarios as any)['city-old'])
+
+// 将 Strapi 媒体对象转换为完整 URL
+function getFullImageUrl(imageObj: any): string {
+  if (!imageObj) return ''
+  // 如果已经是字符串（静态占位图），直接返回
+  if (typeof imageObj === 'string') return imageObj
+  // Strapi 媒体对象：取 url 字段并拼接域名
+  if (imageObj.url) {
+    return imageObj.url.startsWith('http') ? imageObj.url : `${API_BASE_URL}${imageObj.url}`
+  }
+  return ''
+}
+
+// 获取接口图片并静默替换
+onMounted(async () => {
+  try {
+    const response = await getApplicationCase({ type: id })
+    const apiItem = response?.data?.[0]
+    if (apiItem && apiItem.disadvantageUrl && apiItem.advantagesUrl) {
+      // 深拷贝静态数据，避免直接修改原对象
+      const newScenario = JSON.parse(JSON.stringify(scenario.value))
+      if (newScenario.sections && newScenario.sections.length >= 2) {
+        newScenario.sections[0].image = getFullImageUrl(apiItem.disadvantageUrl)
+        newScenario.sections[1].image = getFullImageUrl(apiItem.advantagesUrl)
+        scenario.value = newScenario
+      }
+    }
+  } catch (e) {
+    // 静默失败，继续使用静态数据中的占位图片，不影响页面展示
+    console.warn('获取场景图片失败，使用默认图片', e)
+  }
 })
 </script>
 

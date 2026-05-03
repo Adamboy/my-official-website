@@ -73,7 +73,6 @@ const activeQr = ref<string | null>(null)
 import wechatIcon from '@/assets/icon/link_icon_01.png'
 import dyIcon from '@/assets/icon/dy.png'
 const { publicInfo, fetchPublicInfo } = usePublicInfo()
-
 // API 基础地址配置
 const API_BASE_URL = import.meta.env.VITE_STRAPI_URL || (import.meta.env.DEV ? 'http://localhost:1337' : '')
 // 动态二维码路径（使用公共信息数据）

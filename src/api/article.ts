@@ -81,3 +81,24 @@ export const getNewsDetail = (id: string) => {  // 改 string
 
   //  url: `/news-centers/${id}?populate[detail_blocks][populate]=*`,
     // url: `/news-centers/${id}?populate=*`,
+
+
+//获取应用案例
+export const getApplicationCase = (params: {
+  type?: string;          // 可选，不传或空字符串时不添加 filter
+}) => {
+  const queryParams: Record<string, any> = {
+    'populate': '*',
+  };
+
+  // 只有 type 存在且非空字符串时才添加过滤条件
+  if (params.type && params.type.trim() !== '') {
+    queryParams['filters[type][$eq]'] = params.type;
+  }
+
+  return request({
+    url: '/applications',
+    method: 'GET',
+    params: queryParams,
+  });
+};
