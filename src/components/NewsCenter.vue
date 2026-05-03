@@ -384,11 +384,14 @@ onUnmounted(() => {
 .news-item {
   flex: 0 0 330px;
   width: 330px;
+  height: 500px;
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     transform: translateY(-6px);
@@ -404,8 +407,6 @@ onUnmounted(() => {
 
 .news-info {
   padding: 20px;
-  position: relative;
-  padding-bottom: 68px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -443,9 +444,8 @@ onUnmounted(() => {
 }
 
 .news-more {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
+  margin-top: auto;
+  align-self: flex-end;
   padding: 8px 14px;
   border-radius: 999px;
   color: #1e3a5f;
